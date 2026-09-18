@@ -61,6 +61,12 @@
                         <artifactId>spring-boot-starter-actuator</artifactId>
                 </dependency>
 
+                <!-- HATEOAS: PagedModel para serializacion estable de paginas -->
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-hateoas</artifactId>
+                </dependency>
+
                 <!-- OpenAPI / Swagger UI -->
                 <dependency>
                         <groupId>org.springdoc</groupId>

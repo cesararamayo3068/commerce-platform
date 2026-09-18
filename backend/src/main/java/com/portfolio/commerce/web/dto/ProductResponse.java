@@ -1,0 +1,18 @@
+package com.portfolio.commerce.web.dto;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+/**
+ * API representation of a product. Never exposes the JPA entity directly.
+ */
+public record ProductResponse(
+        Long id,
+        String name,
+        String description,
+        BigDecimal price,
+        boolean active,
+        Instant createdAt,
+        Instant updatedAt
+) {
+}

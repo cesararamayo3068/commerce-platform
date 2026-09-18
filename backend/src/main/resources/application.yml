@@ -1,0 +1,60 @@
+# ============================================================
+# commerce-platform — backend (Etapa 1: skeleton)
+#
+# Toda la configuracion sensible/entorno se resuelve con
+# variables de entorno. Dentro de Docker Compose el backend se
+# conecta a PostgreSQL mediante el nombre de servicio "postgres"
+# (red interna del proyecto), NUNCA por localhost:55432.
+#
+# Para correr localmente contra el PostgreSQL del proyecto
+# (fuera de Docker), sobrescribi:
+#   DB_HOST=localhost
+#   DB_PORT=55432
+# ============================================================
+
+spring:
+  application:
+    name: commerce-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:commerce}
+    username: ${DB_USER:portfolio}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    # Flyway es la autoridad del esquema: Hibernate NO crea ni
+    # modifica tablas. "validate" solo verifica que las entidades
+    # mapeadas existan en la base (aun no hay entidades en Etapa 1).
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Proteccion: impide que un "flyway clean" accidental borre datos.
+    clean-disabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

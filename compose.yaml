@@ -1,0 +1,65 @@
+# ============================================================
+# commerce-platform — Etapa 0: aislamiento Docker
+# Único servicio: PostgreSQL 17, completamente aislado del
+# entorno laboral (proyecto, containers, volumes y network
+# propios, prefijo "portfolio-commerce").
+# ============================================================
+
+name: portfolio-commerce
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: portfolio-commerce-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-portfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria. Copia .env.example a .env y definila.}
+      POSTGRES_DB: ${POSTGRES_DB:-commerce}
+    ports:
+      - "${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - portfolio-commerce-postgres-data:/var/lib/postgresql/data
+    networks:
+      - portfolio-commerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-portfolio} -d ${POSTGRES_DB:-commerce}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+    container_name: portfolio-commerce-backend
+    restart: unless-stopped
+    environment:
+      # Conexion interna a PostgreSQL (misma red del proyecto)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-commerce}
+      DB_USER: ${POSTGRES_USER:-portfolio}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria. Copia .env.example a .env y definila.}
+    ports:
+      - "${BACKEND_PORT:-18080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - portfolio-commerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  portfolio-commerce-postgres-data:
+    name: portfolio-commerce-postgres-data
+
+networks:
+  portfolio-commerce-network:
+    name: portfolio-commerce-network
+    driver: bridge

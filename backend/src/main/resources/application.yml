@@ -1,5 +1,5 @@
 # ============================================================
-# commerce-platform — backend (Etapa 1: skeleton)
+# commerce-platform — backend
 #
 # Toda la configuracion sensible/entorno se resuelve con
 # variables de entorno. Dentro de Docker Compose el backend se
@@ -26,8 +26,8 @@ spring:
 
   jpa:
     # Flyway es la autoridad del esquema: Hibernate NO crea ni
-    # modifica tablas. "validate" solo verifica que las entidades
-    # mapeadas existan en la base (aun no hay entidades en Etapa 1).
+    # modifica tablas. "validate" verifica que las entidades
+    # mapeadas existan en la base.
     hibernate:
       ddl-auto: validate
     open-in-view: false

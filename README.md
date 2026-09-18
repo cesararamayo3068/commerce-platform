@@ -1,8 +1,8 @@
-# commerce-platform — Etapa 1: Backend skeleton (Spring Boot 3)
+# commerce-platform — Etapa 2: Modelo de dominio inicial
 
-Proyecto personal de portfolio. La **Etapa 0** validó el aislamiento total del entorno Docker personal (PostgreSQL 17 con recursos propios). La **Etapa 1** agrega el skeleton profesional del backend **Spring Boot 3 / Java 21**, integrado al mismo stack aislado.
+Proyecto personal de portfolio. La **Etapa 0** validó el aislamiento total del entorno Docker personal (PostgreSQL 17 con recursos propios). La **Etapa 1** agregó el skeleton del backend **Spring Boot 3 / Java 21**. La **Etapa 2** implementa el **modelo de dominio inicial** (User, Product, Cart, CartItem) con su persistencia vía Flyway.
 
-> **Estado:** Etapa 1 — PostgreSQL 17 + backend Spring Boot 3.5 (Java 21, Maven, JPA, Flyway, Actuator, OpenAPI). Frontend (Angular), Spring Security/JWT, dominio de negocio y CI/CD se agregan en etapas posteriores.
+> **Estado:** Etapa 2 — PostgreSQL 17 + backend Spring Boot 3.5 (Java 21, Maven, JPA, Flyway, Actuator, OpenAPI) + modelo de dominio inicial. Frontend (Angular), Spring Security/JWT, promociones, checkout y CI/CD se agregan en etapas posteriores.
 
 ## Qué crea este proyecto (y qué NO toca)
 
@@ -149,6 +149,42 @@ mvnw.cmd spring-boot:run
 
 > En PowerShell usá `$env:DB_HOST="localhost"` etc. Esto **no** toca tu Java/Maven global: usá el JDK 21 y Maven del contenedor, o un JDK/Maven portable bajo `C:\portfolio\tools`.
 
+## Etapa 2 — Modelo de dominio
+
+El modelo de dominio inicial vive en `com.portfolio.commerce.domain` y cubre las entidades del challenge original de Shopping Cart:
+
+| Entidad | Tabla | Notas |
+|---|---|---|
+| `User` | `users` | `dni` obligatorio y único; `vip` identifica clientes VIP. Sin autenticación todavía. |
+| `Product` | `products` | `price` como `BigDecimal` (NUMERIC(12,2), nunca double/float); `active` para el catálogo. |
+| `Cart` | `carts` | Pertenece a un `User`; `status` es un enum (`ACTIVE`, `CHECKED_OUT`, `CANCELLED`) persistido como STRING. |
+| `CartItem` | `cart_items` | `quantity` > 0; `UNIQUE(cart_id, product_id)` impide duplicar el mismo producto en el mismo carrito. |
+
+### Decisiones de diseño
+
+- **Relaciones unidireccionales** (`Cart -> User`, `CartItem -> Cart`, `CartItem -> Product`), todas `LAZY`: el modelo es simple, evita colecciones innecesarias y problemas de serialización/N+1.
+- **Auditoría con callbacks JPA** (`@PrePersist`/`@PreUpdate`) en la clase base `AuditableEntity`: cero configuración extra y suficiente para `createdAt`/`updatedAt`. Si más adelante se necesita auditoría de usuario (`createdBy`), se migra a Spring Data auditing.
+- **Sin `equals`/`hashCode` customizados**: las entidades usan identidad de objeto, lo que evita problemas con proxies y lazy loading.
+- **Flyway como autoridad del schema**: `V1__create_initial_domain.sql` crea las tablas con PK, FK, NOT NULL, UNIQUE, CHECK e índices. Hibernate corre con `ddl-auto: validate` y valida que las entidades coincidan con el schema; nunca lo modifica.
+- **Doble línea de defensa**: Bean Validation (`@NotBlank`, `@DecimalMin`, `@Min`) valida en la capa de aplicación; los CHECK constraints de PostgreSQL respaldan a nivel de base.
+- **Repositories** Spring Data JPA mínimos por entidad; `UserRepository.findByDni` es el único método derivado (útil para validar el modelo).
+
+### Migración Flyway
+
+`backend/src/main/resources/db/migration/V1__create_initial_domain.sql` — crea `users`, `products`, `carts` y `cart_items` (compatible PostgreSQL 17). Se aplica automáticamente al arrancar el backend.
+
+### Tests
+
+- `EntityValidationTest`: validación de beans (dni obligatorio, precio no negativo, cantidad ≥ 1).
+- `CommerceBackendApplicationTests`: `contextLoads()` (smoke test de contexto, sin base externa).
+
+```bash
+cd backend
+./mvnw test
+```
+
+> La suite de tests corre sin Docker ni PostgreSQL externo. Las migraciones Flyway y la validación del schema (`ddl-auto: validate`) se ejercitan al arrancar la aplicación, por ejemplo con Docker Compose.
+
 ## Conexión a PostgreSQL
 
 | Parámetro | Valor |
@@ -163,16 +199,21 @@ mvnw.cmd spring-boot:run
 
 ```
 commerce-platform/
-├── backend/          # API Spring Boot 3.5 / Java 21 (Etapa 1: skeleton)
-│   ├── src/main/java/com/portfolio/commerce/   # paquete base
+├── backend/          # API Spring Boot 3.5 / Java 21
+│   ├── src/main/java/com/portfolio/commerce/
+│   │   ├── CommerceBackendApplication.java
+│   │   └── domain/                        # modelo de dominio (Etapa 2)
+│   │       ├── AuditableEntity.java       # base auditable (createdAt/updatedAt)
+│   │       ├── user/                      # User + UserRepository
+│   │       ├── product/                   # Product + ProductRepository
+│   │       └── cart/                      # CartStatus, Cart, CartItem + repositories
 │   ├── src/main/resources/application.yml      # config por env vars
-│   ├── src/main/resources/db/migration/        # migraciones Flyway (preparada)
-│   ├── src/test/                               # contextLoads()
+│   ├── src/main/resources/db/migration/        # V1__create_initial_domain.sql
+│   ├── src/test/                               # contextLoads + tests de dominio
 │   ├── Dockerfile                              # multi-stage (build + runtime)
 │   ├── pom.xml                                 # Maven (Java 21, Boot 3.5.16)
 │   ├── mvnw / mvnw.cmd / .mvn/                 # Maven Wrapper
 ├── frontend/         # reservado: SPA Angular (etapas futuras)
-├── docs/             # documentación y validaciones
 ├── compose.yaml      # stack: postgres (Etapa 0) + backend (Etapa 1)
 ├── .env.example      # plantilla de variables de entorno
 ├── .gitignore

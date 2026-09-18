@@ -1,6 +1,11 @@
 package com.portfolio.commerce.web.error;
 
+import com.portfolio.commerce.service.CartItemNotFoundException;
+import com.portfolio.commerce.service.CartNotActiveException;
+import com.portfolio.commerce.service.CartNotFoundException;
+import com.portfolio.commerce.service.ProductNotActiveException;
 import com.portfolio.commerce.service.ProductNotFoundException;
+import com.portfolio.commerce.service.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -31,9 +36,15 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFound(ProductNotFoundException ex, HttpServletRequest request) {
+    @ExceptionHandler({ProductNotFoundException.class, CartNotFoundException.class,
+            CartItemNotFoundException.class, UserNotFoundException.class})
+    public ResponseEntity<ApiError> handleNotFound(RuntimeException ex, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), request, null);
+    }
+
+    @ExceptionHandler({CartNotActiveException.class, ProductNotActiveException.class})
+    public ResponseEntity<ApiError> handleConflict(RuntimeException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

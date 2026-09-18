@@ -60,4 +60,8 @@ public class Cart extends AuditableEntity {
     public CartStatus getStatus() {
         return status;
     }
+
+    public void setStatus(CartStatus status) {
+        this.status = status;
+    }
 }

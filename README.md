@@ -84,6 +84,74 @@ curl -X DELETE http://localhost:18080/api/products/1
 
 Respuesta consistente `{timestamp, status, error, message, path}`; en validaciones se agrega `fieldErrors` con el detalle por campo. `404` para producto inexistente, `400` para body o parámetros inválidos (incluidos paginación/sort), `500` para errores internos (sin stack traces).
 
+## Cart API
+
+Base path: `/api/carts`
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/carts` | Crea un carrito `ACTIVE` para un usuario, sin items. |
+| `GET` | `/api/carts/{id}` | Obtiene un carrito con sus items, subtotales y total. |
+| `GET` | `/api/carts` | Listado paginado; opcionalmente `?userId=` y/o `?status=` filtran. |
+| `POST` | `/api/carts/{cartId}/items` | Agrega un producto; si ya está en el carrito, incrementa la cantidad. |
+| `PUT` | `/api/carts/{cartId}/items/{productId}` | Fija la cantidad al valor exacto indicado (no es un incremento). |
+| `DELETE` | `/api/carts/{cartId}/items/{productId}` | Elimina el item por completo (no decrementa la cantidad). |
+| `DELETE` | `/api/carts/{id}` | Cancelación lógica: `status = CANCELLED`. |
+
+### Estados del carrito
+
+`ACTIVE` → `CANCELLED` (cancelación) o `CHECKED_OUT` (reservado para checkout en etapas posteriores).
+
+Solo un carrito `ACTIVE` puede modificarse. Intentar agregar/eliminar items o cambiar cantidades en un carrito `CANCELLED` o `CHECKED_OUT` devuelve `409 Conflict`.
+
+### Reglas de contenido
+
+- Un producto solo puede aparecer una vez por carrito (`UNIQUE(cart_id, product_id)`); agregar un producto ya presente incrementa la cantidad existente.
+- `quantity` debe ser mayor que 0.
+- Solo se agregan productos activos (`active=true`).
+- Eliminar un item lo quita por completo; no decrementa la cantidad.
+
+### Cálculo de totales
+
+- Subtotal del item = `product.price * quantity`, calculado con `BigDecimal`.
+- Total del carrito = suma de los subtotales de los items (sin descuentos en esta etapa).
+- El total se calcula a partir de los items y no se persiste.
+
+### Ejemplos
+
+```bash
+# Crear carrito
+curl -X POST http://localhost:18080/api/carts \
+  -H "Content-Type: application/json" \
+  -d '{"userId": 1}'
+
+# Obtener carrito
+curl http://localhost:18080/api/carts/1
+
+# Listar carritos activos de un usuario (paginado)
+curl "http://localhost:18080/api/carts?userId=1&status=ACTIVE&page=0&size=20"
+
+# Agregar producto (si ya está, incrementa cantidad)
+curl -X POST http://localhost:18080/api/carts/1/items \
+  -H "Content-Type: application/json" \
+  -d '{"productId": 5, "quantity": 2}'
+
+# Fijar cantidad exacta
+curl -X PUT http://localhost:18080/api/carts/1/items/5 \
+  -H "Content-Type: application/json" \
+  -d '{"quantity": 4}'
+
+# Eliminar item
+curl -X DELETE http://localhost:18080/api/carts/1/items/5
+
+# Cancelar carrito (baja lógica)
+curl -X DELETE http://localhost:18080/api/carts/1
+```
+
+### Errores
+
+Mismo formato `ApiError` que Products. `404` para carrito/usuario/producto/item inexistente, `400` para body o parámetros inválidos, `409` para intentos de modificar un carrito no `ACTIVE` o agregar un producto inactivo.
+
 ## Flyway
 
 Las migraciones viven en `backend/src/main/resources/db/migration/`. `V1__create_initial_domain.sql` crea el schema inicial (`users`, `products`, `carts`, `cart_items`). Flyway es la autoridad del schema: Hibernate corre con `ddl-auto: validate` y nunca crea ni modifica tablas.
@@ -181,10 +249,11 @@ commerce-platform/
 │   │   │   ├── user/                      # User + UserRepository
 │   │   │   ├── product/                   # Product + ProductRepository
 │   │   │   └── cart/                      # CartStatus, Cart, CartItem + repositories
-│   │   ├── service/                       # ProductService + ProductNotFoundException
+│   │   ├── service/                       # ProductService, CartService + excepciones
 │   │   └── web/                           # capa API
 │   │       ├── ProductController.java
-│   │       ├── dto/                       # ProductCreateRequest, ProductUpdateRequest, ProductResponse
+│   │       ├── CartController.java
+│   │       ├── dto/                       # DTOs de Product y Cart
 │   │       └── error/                     # ApiError + GlobalExceptionHandler
 │   ├── src/main/resources/application.yml      # config por env vars
 │   ├── src/main/resources/db/migration/        # V1__create_initial_domain.sql
@@ -193,6 +262,12 @@ commerce-platform/
 │   ├── pom.xml                                 # Maven (Java 21, Boot 3.5.16)
 │   ├── mvnw / mvnw.cmd / .mvn/                 # Maven Wrapper
 ├── frontend/         # reservado: SPA Angular
+├── compose.yaml      # stack: postgres + backend
+├── .env.example      # plantilla de variables de entorno
+├── .gitignore
+└── README.md
+```
+r
 ├── compose.yaml      # stack: postgres + backend
 ├── .env.example      # plantilla de variables de entorno
 ├── .gitignore

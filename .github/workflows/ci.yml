@@ -32,6 +32,9 @@ jobs:
           cache: maven
           cache-dependency-path: backend/pom.xml
 
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
       - name: Run backend tests
         run: ./mvnw --batch-mode --no-transfer-progress test
 

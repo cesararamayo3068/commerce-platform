@@ -66,7 +66,7 @@ class ProductServiceTest {
 
     @Test
     void createPersistsProductActiveByDefault() {
-        ProductCreateRequest request = new ProductCreateRequest("Teclado", "Teclado mecanico", new BigDecimal("99.99"));
+        ProductCreateRequest request = new ProductCreateRequest("Teclado", "Teclado mecanico", null, null, null, new BigDecimal("99.99"));
         Product saved = product(1L, "Teclado", new BigDecimal("99.99"), true);
         when(productRepository.save(any(Product.class))).thenReturn(saved);
 
@@ -105,7 +105,7 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(productRepository.saveAndFlush(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        ProductUpdateRequest request = new ProductUpdateRequest("Teclado RGB", "Nuevo", new BigDecimal("129.00"), null);
+        ProductUpdateRequest request = new ProductUpdateRequest("Teclado RGB", "Nuevo", null, null, null, new BigDecimal("129.00"), null);
         ProductResponse response = productService.update(1L, request);
 
         assertThat(response.name()).isEqualTo("Teclado RGB");
@@ -119,7 +119,7 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(productRepository.saveAndFlush(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        ProductUpdateRequest request = new ProductUpdateRequest("Teclado", "Desc", new BigDecimal("99.99"), false);
+        ProductUpdateRequest request = new ProductUpdateRequest("Teclado", "Desc", null, null, null, new BigDecimal("99.99"), false);
         ProductResponse response = productService.update(1L, request);
 
         assertThat(response.active()).isFalse();
@@ -135,7 +135,7 @@ class ProductServiceTest {
             return p;
         });
 
-        ProductUpdateRequest request = new ProductUpdateRequest("Teclado RGB", "Nuevo", new BigDecimal("129.00"), null);
+        ProductUpdateRequest request = new ProductUpdateRequest("Teclado RGB", "Nuevo", null, null, null, new BigDecimal("129.00"), null);
         ProductResponse response = productService.update(1L, request);
 
         assertThat(response.updatedAt()).isEqualTo(Instant.parse("2026-09-18T12:00:00Z"));

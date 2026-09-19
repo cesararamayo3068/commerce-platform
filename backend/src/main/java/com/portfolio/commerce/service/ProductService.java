@@ -30,6 +30,9 @@ public class ProductService {
     @Transactional
     public ProductResponse create(ProductCreateRequest request) {
         Product product = new Product(request.name(), request.description(), request.price(), true);
+        product.setBrand(request.brand());
+        product.setCategory(request.category());
+        product.setImageUrl(request.imageUrl());
         return toResponse(productRepository.save(product));
     }
 
@@ -50,6 +53,9 @@ public class ProductService {
         product.setName(request.name());
         product.setDescription(request.description());
         product.setPrice(request.price());
+        product.setBrand(request.brand());
+        product.setCategory(request.category());
+        product.setImageUrl(request.imageUrl());
         if (request.active() != null) {
             product.setActive(request.active());
         }
@@ -78,6 +84,9 @@ public class ProductService {
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
+                product.getBrand(),
+                product.getCategory(),
+                product.getImageUrl(),
                 product.getPrice(),
                 product.isActive(),
                 product.getCreatedAt(),

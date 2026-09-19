@@ -58,3 +58,8 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+# CORS: origenes permitidos para el frontend Angular (lista separada por comas).
+# Nunca usar "*": los origenes deben ser explicitos.
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:14200}

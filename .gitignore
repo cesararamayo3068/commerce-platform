@@ -20,15 +20,17 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
 
 # Backend
 backend/target/
 backend/HELP.md
 
-# Frontend — reservado para etapas futuras
+# Frontend
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
+frontend/.vite/
 
 # Docker
 # Los datos de los volumes viven en Docker, no en el repositorio.

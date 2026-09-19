@@ -1,0 +1,3 @@
+import { Component } from '@angular/core';
+@Component({selector:'app-footer',standalone:true,template:`<footer><div><strong>Commerce</strong><span>Una experiencia de compra simple, rápida y segura.</span><small>© 2026 Commerce. Todos los derechos reservados.</small></div></footer>`,styles:`footer{background:#111827;color:#cbd5e1;margin-top:auto}footer div{max-width:1240px;margin:auto;padding:2rem 1.5rem;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2rem}strong{color:#fff;font-size:1.05rem}span{font-size:.88rem}small{color:#94a3b8}@media(max-width:720px){footer div{grid-template-columns:1fr;gap:.5rem}}`})
+export class FooterComponent{}

@@ -39,7 +39,7 @@ class ProductControllerTest {
     private ProductService productService;
 
     private ProductResponse response(Long id, String name, boolean active) {
-        return new ProductResponse(id, name, "Description", new BigDecimal("99.99"), active,
+        return new ProductResponse(id, name, "Description", null, null, null, new BigDecimal("99.99"), active,
                 Instant.parse("2026-09-18T10:00:00Z"), Instant.parse("2026-09-18T10:00:00Z"));
     }
 

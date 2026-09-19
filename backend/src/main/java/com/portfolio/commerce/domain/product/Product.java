@@ -17,8 +17,7 @@ import java.math.BigDecimal;
  * Product of the catalog.
  *
  * Money is modeled with {@link BigDecimal} (never double/float) and stored
- * as NUMERIC(12,2) in PostgreSQL. Stock, categories, images and caching are
- * intentionally out of scope for this stage.
+ * as NUMERIC(12,2) in PostgreSQL. Stock and caching are intentionally out of scope for this stage.
  */
 @Entity
 @Table(name = "products")
@@ -39,6 +38,15 @@ public class Product extends AuditableEntity {
     @DecimalMin(value = "0.0", inclusive = true)
     @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
+
+    @Column(name = "brand", length = 100)
+    private String brand;
+
+    @Column(name = "category", length = 100)
+    private String category;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
     @Column(name = "active", nullable = false)
     private boolean active;
@@ -81,6 +89,13 @@ public class Product extends AuditableEntity {
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public boolean isActive() {
         return active;

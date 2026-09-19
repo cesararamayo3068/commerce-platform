@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+  background: #f5f7fb;
+  font-synthesis: none;
+  --primary: #3157d5;
+  --primary-dark: #2544ad;
+  --accent: #0ea5e9;
+  --surface: #ffffff;
+  --surface-soft: #f8faff;
+  --text: #172033;
+  --muted: #6b7280;
+  --border: #e5e9f2;
+  --danger: #c53b4d;
+  --shadow: 0 12px 32px rgba(31, 41, 55, .08);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: #f5f7fb; }
+body { min-height: 100vh; }
+button, input, textarea { font: inherit; }
+a { color: inherit; }
+app-root { min-height: 100vh; display: flex; flex-direction: column; }
+.btn { border: 0; border-radius: 12px; padding: .72rem 1rem; display: inline-flex; align-items: center; justify-content: center; gap: .45rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: .18s ease; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn--primary { background: var(--primary); color: white; box-shadow: 0 7px 16px rgba(49,87,213,.22); }
+.btn--primary:hover:not(:disabled) { background: var(--primary-dark); }
+.btn--ghost { background: #eef2ff; color: #334155; }
+.btn--ghost:hover:not(:disabled) { background: #e2e8ff; }
+.btn--danger { background: #fff0f2; color: var(--danger); }
+.btn--sm { padding: .55rem .8rem; border-radius: 10px; font-size: .85rem; }
+.btn--block { width: 100%; }
+.banner { border-radius: 14px; }
+.banner--error { background: #fff1f2 !important; border: 1px solid #fecdd3 !important; color: #9f1239 !important; }
+/* Light application surface overrides for the administration/cart views. */
+app-manage .manage__title, app-cart-page .cart-page__title, app-product-form .field__label { color: #172033 !important; }
+app-manage .manage__subtitle, app-manage .manage__page-info, app-cart-page .cart-page__subtitle { color: #6b7280 !important; }
+app-manage .manage__panel, app-cart-page .cart-summary, app-cart-page .cart-item { background: #fff !important; border-color: #e5e9f2 !important; box-shadow: 0 8px 28px rgba(30,41,59,.05); }
+app-manage .manage__panel-title, app-manage .manage__cell-name, app-cart-page .cart-item__name, app-cart-page .cart-summary__title { color: #172033 !important; }
+app-manage .manage__table-wrap { background:#fff; border-color:#e5e9f2 !important; box-shadow:0 8px 28px rgba(30,41,59,.05); }
+app-manage .manage__table th { background:#f8fafc !important; color:#64748b !important; border-color:#e5e9f2 !important; }
+app-manage .manage__table td { color:#334155 !important; border-color:#eef1f5 !important; }
+app-manage .manage__cell-desc { color:#64748b !important; }
+app-product-form .field__input { background:#fff !important; color:#172033 !important; border-color:#dbe1ea !important; }
+app-cart-page .cart-item__price, app-cart-page .cart-summary__row { color:#64748b !important; }
+app-cart-page .cart-item__subtotal, app-cart-page .cart-summary__row--total { color:#172033 !important; }

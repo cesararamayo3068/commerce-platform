@@ -1,8 +1,8 @@
 # ============================================================
-# commerce-platform — Etapa 0: aislamiento Docker
-# Único servicio: PostgreSQL 17, completamente aislado del
-# entorno laboral (proyecto, containers, volumes y network
-# propios, prefijo "portfolio-commerce").
+# commerce-platform — stack completo
+# Servicios: PostgreSQL 17, backend Spring Boot, frontend Angular.
+# Todos los recursos (containers, volumes, network) son propios
+# del proyecto con prefijo "portfolio-commerce".
 # ============================================================
 
 name: portfolio-commerce
@@ -41,6 +41,8 @@ services:
       DB_NAME: ${POSTGRES_DB:-commerce}
       DB_USER: ${POSTGRES_USER:-portfolio}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria. Copia .env.example a .env y definila.}
+      # Origenes permitidos para CORS (frontend Angular)
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:14200}
     ports:
       - "${BACKEND_PORT:-18080}:8080"
     depends_on:
@@ -54,6 +56,23 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: portfolio-commerce-frontend
+    restart: unless-stopped
+    environment:
+      # El dev server de Angular escucha en 0.0.0.0:4200 dentro
+      # del contenedor; el host lo publica en 14200.
+      NODE_ENV: development
+    ports:
+      - "${FRONTEND_PORT:-14200}:4200"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - portfolio-commerce-network
 
 volumes:
   portfolio-commerce-postgres-data:

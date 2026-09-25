@@ -18,6 +18,9 @@ export interface Cart {
   status: CartStatus;
   items: CartItem[];
   total: number;
+  subtotal?: number;
+  discount?: number;
+  couponCode?: string | null;
   createdAt: string;
   updatedAt: string;
 }

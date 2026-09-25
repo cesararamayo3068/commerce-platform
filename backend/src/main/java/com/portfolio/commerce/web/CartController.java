@@ -145,6 +145,15 @@ public class CartController {
     public CartResponse cancel(@PathVariable Long id) {
         checkOwner(id); return cartService.cancel(id);
     }
+    @PostMapping("/{id}/coupon")
+    public CartResponse applyCoupon(@PathVariable Long id,@Valid @RequestBody CouponRequest request){
+        checkOwner(id);return cartService.applyCoupon(id,request.code());
+    }
+    @DeleteMapping("/{id}/coupon")
+    public CartResponse removeCoupon(@PathVariable Long id){
+        checkOwner(id);return cartService.removeCoupon(id);
+    }
+    public record CouponRequest(@jakarta.validation.constraints.NotBlank String code){}
     private void checkOwner(Long id) {
         if (!ownership.owns(id, org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication())) throw new org.springframework.security.access.AccessDeniedException("Not your cart");
     }

@@ -49,6 +49,9 @@ class CartServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private PromotionService promotionService;
+
     @InjectMocks
     private CartService cartService;
 

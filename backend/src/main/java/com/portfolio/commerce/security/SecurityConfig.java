@@ -33,7 +33,7 @@ public class SecurityConfig {
     .requestMatchers(HttpMethod.GET,"/api/auth/me").authenticated()
     .requestMatchers("/actuator/health").permitAll()
     .requestMatchers("/swagger-ui/**","/swagger-ui.html","/v3/api-docs/**").permitAll()
-    .requestMatchers("/api/products/**").hasRole("ADMIN")
+    .requestMatchers("/api/products/**","/api/promotions/**").hasRole("ADMIN")
     .requestMatchers("/api/carts/**").authenticated()
     .anyRequest().denyAll())
    .oauth2ResourceServer(o->o.jwt(j->j.jwtAuthenticationConverter(converter)))

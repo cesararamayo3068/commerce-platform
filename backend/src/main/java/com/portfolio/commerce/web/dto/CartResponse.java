@@ -18,7 +18,13 @@ public record CartResponse(
         CartStatus status,
         List<CartItemResponse> items,
         BigDecimal total,
+        BigDecimal subtotal,
+        BigDecimal discount,
+        String couponCode,
         Instant createdAt,
         Instant updatedAt
 ) {
+    public CartResponse(Long id, Long userId, CartStatus status, List<CartItemResponse> items, BigDecimal total, Instant createdAt, Instant updatedAt) {
+        this(id,userId,status,items,total,total,BigDecimal.ZERO,null,createdAt,updatedAt);
+    }
 }

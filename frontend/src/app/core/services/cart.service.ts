@@ -37,6 +37,18 @@ export class CartService {
 
   constructor(private readonly http: HttpClient) {}
 
+  applyCoupon(code: string): Observable<Cart> {
+    const cart = this.cartSignal();
+    if (!cart) throw new Error('No active cart');
+    return this.http.post<Cart>(`${this.baseUrl}/${cart.id}/coupon`, { code }).pipe(tap(updated => this.cartSignal.set(updated)));
+  }
+
+  removeCoupon(): Observable<Cart> {
+    const cart = this.cartSignal();
+    if (!cart) throw new Error('No active cart');
+    return this.http.delete<Cart>(`${this.baseUrl}/${cart.id}/coupon`).pipe(tap(updated => this.cartSignal.set(updated)));
+  }
+
   /** Restores the cart from the persisted cartId, if any. */
   restore(): void {
     if (!this.auth.isLoggedIn()) return;

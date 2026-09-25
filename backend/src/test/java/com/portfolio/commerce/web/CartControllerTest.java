@@ -29,14 +29,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(CartController.class)
 class CartControllerTest {
+    @org.junit.jupiter.api.BeforeEach void allowTestOwnership(){
+        org.mockito.Mockito.when(ownership.isUser(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.nullable(org.springframework.security.core.Authentication.class))).thenReturn(true);
+        org.mockito.Mockito.when(ownership.owns(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.nullable(org.springframework.security.core.Authentication.class))).thenReturn(true);
+    }
+
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private CartService cartService;
+    @MockitoBean private com.portfolio.commerce.security.CartOwnership ownership;
 
     private CartResponse response(Long id, Long userId, CartStatus status) {
         return new CartResponse(id, userId, status, List.of(), BigDecimal.ZERO,

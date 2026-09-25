@@ -74,6 +74,15 @@
                         <version>${springdoc.version}</version>
                 </dependency>
 
+                <!-- Authentication and authorization -->
+                <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>
+                <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-oauth2-resource-server</artifactId></dependency>
+                <!-- In-memory database for Spring context/security tests (no external PostgreSQL). -->
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <scope>test</scope>
+                </dependency>
                 <!-- Tests -->
                 <dependency>
                         <groupId>org.springframework.boot</groupId>

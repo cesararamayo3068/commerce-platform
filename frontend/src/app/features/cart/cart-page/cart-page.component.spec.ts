@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { CartPageComponent } from './cart-page.component';
 import { CartService } from '../../../core/services/cart.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../core/config/environment';
 import { Cart } from '../../../core/models/cart.model';
 
@@ -68,6 +69,13 @@ describe('CartPageComponent', () => {
   });
 
   it('cancels the cart and clears the persisted cartId', () => {
+    // Restoring a cart now requires an authenticated user.
+    const authService = TestBed.inject(AuthService);
+    authService.login('test@example.com', 'test-password').subscribe();
+    const loginReq = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
+    expect(loginReq.request.method).toBe('POST');
+    loginReq.flush({ token: 'test-token', userId: 1, email: 'test@example.com', role: 'USER' });
+
     localStorage.setItem('commerce-platform.cartId', '1');
     cartService['cartSignal'].set(
       activeCart(1, [

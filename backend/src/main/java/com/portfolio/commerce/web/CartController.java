@@ -39,8 +39,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
 
     private final CartService cartService;
+    private final com.portfolio.commerce.security.CartOwnership ownership;
 
-    public CartController(CartService cartService) {
+    public CartController(CartService cartService, com.portfolio.commerce.security.CartOwnership ownership) {
+        this.ownership = ownership;
         this.cartService = cartService;
     }
 
@@ -54,6 +56,7 @@ public class CartController {
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public ResponseEntity<CartResponse> create(@Valid @RequestBody CartCreateRequest request) {
+        if (!ownership.isUser(request.userId(), org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication())) throw new org.springframework.security.access.AccessDeniedException("Not your account");
         return ResponseEntity.status(HttpStatus.CREATED).body(cartService.create(request));
     }
 
@@ -65,7 +68,7 @@ public class CartController {
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public CartResponse getById(@PathVariable Long id) {
-        return cartService.getById(id);
+        checkOwner(id); return cartService.getById(id);
     }
 
     @GetMapping
@@ -78,6 +81,7 @@ public class CartController {
     public PagedModel<CartResponse> list(@ParameterObject Pageable pageable,
                                          @RequestParam(required = false) Long userId,
                                          @RequestParam(required = false) CartStatus status) {
+        if (userId == null || !ownership.isUser(userId, org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication())) throw new org.springframework.security.access.AccessDeniedException("Filter by your userId");
         Page<CartResponse> page = cartService.list(userId, status, pageable);
         return PagedModel.of(page.getContent(),
                 new PagedModel.PageMetadata(page.getSize(), page.getNumber(),
@@ -96,7 +100,7 @@ public class CartController {
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public CartResponse addItem(@PathVariable Long cartId, @Valid @RequestBody CartItemRequest request) {
-        return cartService.addItem(cartId, request);
+        checkOwner(cartId); return cartService.addItem(cartId, request);
     }
 
     @PutMapping("/{cartId}/items/{productId}")
@@ -112,7 +116,7 @@ public class CartController {
     })
     public CartResponse updateQuantity(@PathVariable Long cartId, @PathVariable Long productId,
                                        @Valid @RequestBody CartItemQuantityUpdateRequest request) {
-        return cartService.updateQuantity(cartId, productId, request);
+        checkOwner(cartId); return cartService.updateQuantity(cartId, productId, request);
     }
 
     @DeleteMapping("/{cartId}/items/{productId}")
@@ -125,7 +129,7 @@ public class CartController {
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public ResponseEntity<Void> removeItem(@PathVariable Long cartId, @PathVariable Long productId) {
-        cartService.removeItem(cartId, productId);
+        checkOwner(cartId); cartService.removeItem(cartId, productId);
         return ResponseEntity.noContent().build();
     }
 
@@ -139,6 +143,9 @@ public class CartController {
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public CartResponse cancel(@PathVariable Long id) {
-        return cartService.cancel(id);
+        checkOwner(id); return cartService.cancel(id);
+    }
+    private void checkOwner(Long id) {
+        if (!ownership.owns(id, org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication())) throw new org.springframework.security.access.AccessDeniedException("Not your cart");
     }
 }

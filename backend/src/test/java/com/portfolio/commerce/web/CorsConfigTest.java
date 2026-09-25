@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * The allowed origin is configured via {@code cors.allowed-origins}
  * (default {@code http://localhost:14200}); the wildcard is never used.
  */
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
 @WebMvcTest(ProductController.class)
 class CorsConfigTest {
 

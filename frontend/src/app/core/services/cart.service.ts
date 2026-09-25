@@ -1,3 +1,5 @@
+import { inject } from '@angular/core';
+import { AuthService } from './auth.service';
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
@@ -20,6 +22,7 @@ const CART_ID_STORAGE_KEY = 'commerce-platform.cartId';
  */
 @Injectable({ providedIn: 'root' })
 export class CartService {
+  private readonly auth=inject(AuthService);
   private readonly baseUrl = `${environment.apiUrl}/carts`;
 
   private readonly cartSignal = signal<Cart | null>(null);
@@ -36,6 +39,7 @@ export class CartService {
 
   /** Restores the cart from the persisted cartId, if any. */
   restore(): void {
+    if (!this.auth.isLoggedIn()) return;
     const cartId = this.readStoredCartId();
     if (cartId === null) {
       return;
@@ -63,7 +67,7 @@ export class CartService {
 
   /** Creates a new ACTIVE cart for the demo user. */
   create(): Observable<Cart> {
-    const request: CartCreateRequest = { userId: environment.demoUserId };
+    const request: CartCreateRequest = { userId: this.auth.session()!.userId };
     return this.http.post<Cart>(this.baseUrl, request).pipe(
       tap((cart) => {
         this.persistCartId(cart.id);

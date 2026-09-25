@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { AuthService } from './auth.service';
 import { CartService } from './cart.service';
 import { environment } from '../config/environment';
 import { Cart } from '../models/cart.model';
@@ -28,6 +29,8 @@ describe('CartService', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
+    const auth = TestBed.inject(AuthService);
+    (auth as any).sessionSignal.set({token:'test',userId:1,email:'test@example.com',role:'USER'});
     service = TestBed.inject(CartService);
     httpMock = TestBed.inject(HttpTestingController);
   });

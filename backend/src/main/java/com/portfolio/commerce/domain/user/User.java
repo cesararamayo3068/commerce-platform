@@ -12,9 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * Customer of the platform.
  *
- * The {@code vip} flag exists because the original challenge needs to
- * identify VIP customers. Authentication (password, JWT, roles) is out of
- * scope for this stage and will be added later.
+ * The {@code vip} flag identifies VIP customers. Credentials and roles
+ * live in a separate auth_accounts table.
  */
 @Entity
 @Table(name = "users")

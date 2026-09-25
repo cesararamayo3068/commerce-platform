@@ -34,13 +34,15 @@ import java.util.List;
 @Service
 public class CartService {
 
+    private final PromotionService promotionService;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
     public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository,
-                       UserRepository userRepository, ProductRepository productRepository) {
+                       UserRepository userRepository, ProductRepository productRepository, PromotionService promotionService) {
+        this.promotionService = promotionService;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.userRepository = userRepository;
@@ -112,6 +114,20 @@ public class CartService {
         return toResponse(cartRepository.saveAndFlush(cart));
     }
 
+    @Transactional
+    public CartResponse applyCoupon(Long id,String code){
+        Cart cart=findActiveCart(id);
+        cart.setPromotion(promotionService.validCoupon(code));
+        return toResponse(cart);
+    }
+
+    @Transactional
+    public CartResponse removeCoupon(Long id){
+        Cart cart=findActiveCart(id);
+        cart.setPromotion(null);
+        return toResponse(cart);
+    }
+
     private Cart findCart(Long id) {
         return cartRepository.findById(id)
                 .orElseThrow(() -> new CartNotFoundException(id));
@@ -138,12 +154,16 @@ public class CartService {
         BigDecimal total = items.stream()
                 .map(CartItemResponse::subtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal discount=cart.getPromotion()==null?BigDecimal.ZERO:promotionService.discount(cart.getPromotion(),total);
         return new CartResponse(
                 cart.getId(),
                 cart.getUser().getId(),
                 cart.getStatus(),
                 items,
+                total.subtract(discount),
                 total,
+                discount,
+                discount.signum()>0?cart.getPromotion().getCode():null,
                 cart.getCreatedAt(),
                 cart.getUpdatedAt());
     }

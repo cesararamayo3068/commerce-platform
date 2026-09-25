@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
@@ -10,7 +11,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 @Component({
   selector: 'app-cart-page',
   standalone: true,
-  imports: [CurrencyPipe, RouterLink, LoadingComponent, EmptyStateComponent],
+  imports: [FormsModule, CurrencyPipe, RouterLink, LoadingComponent, EmptyStateComponent],
   template: `
     <section class="cart-page">
       <div class="cart-page__header">
@@ -86,6 +87,16 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                 <span>Unidades</span>
                 <span>{{ cartService.itemCount() }}</span>
               </div>
+              <label for="coupon-code">Cupón de descuento</label>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                <input id="coupon-code" [(ngModel)]="couponCode" maxlength="40" placeholder="Código" [disabled]="busy()" style="min-width:0;flex:1;padding:.5rem" />
+                <button class="btn btn--primary" [disabled]="busy() || !couponCode.trim()" (click)="applyCoupon()">Aplicar</button>
+              </div>
+              @if (cart.couponCode) {
+                <div class="cart-summary__row"><span>{{ cart.couponCode }}</span><button class="btn btn--ghost btn--sm" [disabled]="busy()" (click)="removeCoupon()">Quitar</button></div>
+              }
+              <div class="cart-summary__row"><span>Subtotal</span><span>{{ (cart.subtotal ?? cart.total) | currency:'USD':'symbol':'1.2-2' }}</span></div>
+              <div class="cart-summary__row"><span>Descuento</span><span>-{{ (cart.discount ?? 0) | currency:'USD':'symbol':'1.2-2' }}</span></div>
               <div class="cart-summary__row cart-summary__row--total">
                 <span>Total</span>
                 <span data-testid="cart-total">{{ cart.total | currency: 'USD' : 'symbol' : '1.2-2' }}</span>
@@ -189,6 +200,21 @@ export class CartPageComponent implements OnInit {
   readonly cartService = inject(CartService);
   private readonly toastService = inject(ToastService);
 
+  couponCode = '';
+  applyCoupon(): void {
+    this.busy.set(true);
+    this.cartService.applyCoupon(this.couponCode).subscribe({
+      next: () => { this.busy.set(false); this.toastService.success('Cupón aplicado'); },
+      error: err => { this.busy.set(false); this.toastService.error(toUserMessage(err)); },
+    });
+  }
+  removeCoupon(): void {
+    this.busy.set(true);
+    this.cartService.removeCoupon().subscribe({
+      next: () => { this.busy.set(false); this.couponCode = ''; },
+      error: err => { this.busy.set(false); this.toastService.error(toUserMessage(err)); },
+    });
+  }
   readonly busy = signal(false);
   readonly cancelling = signal(false);
 

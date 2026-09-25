@@ -1,0 +1,6 @@
+Etapa 7: promociones y cupones.
+Extraer sobre C:\portfolio\commerce-platform en feature/promotions.
+No incluye .env ni node_modules.
+Backend: ./mvnw test (si existe Maven wrapper) o mvn test. Frontend: npm ci y npm test -- --watch=false, npm run build.
+No se pudieron ejecutar tests en este entorno: Maven no instalado y npm ci no completo.
+NO desplegar hasta pasar pruebas locales.

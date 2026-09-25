@@ -40,6 +40,13 @@ public class Cart extends AuditableEntity {
     @Column(name = "status", nullable = false, length = 20)
     private CartStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="promotion_id")
+    private com.portfolio.commerce.domain.promotion.Promotion promotion;
+
+    public com.portfolio.commerce.domain.promotion.Promotion getPromotion(){return promotion;}
+    public void setPromotion(com.portfolio.commerce.domain.promotion.Promotion promotion){this.promotion=promotion;}
+
     protected Cart() {
         // required by JPA
     }

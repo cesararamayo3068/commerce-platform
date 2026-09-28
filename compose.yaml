@@ -43,6 +43,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria. Copia .env.example a .env y definila.}
       # Origenes permitidos para CORS (frontend Angular)
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:14200}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatorio. Definilo en .env.}
     ports:
       - "${BACKEND_PORT:-18080}:8080"
     depends_on:
@@ -82,3 +83,4 @@ networks:
   portfolio-commerce-network:
     name: portfolio-commerce-network
     driver: bridge
+

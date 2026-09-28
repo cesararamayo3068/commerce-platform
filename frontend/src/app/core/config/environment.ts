@@ -10,5 +10,6 @@
 export const environment = {
   demoUserId: 1, // legacy test fixture; runtime uses authenticated userId
   production: false,
-  apiUrl: 'http://localhost:18081/api',
+  apiUrl: 'http://localhost:18080/api',
 } as const;
+

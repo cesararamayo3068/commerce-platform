@@ -28,8 +28,8 @@ import java.util.List;
  * Entity <-> DTO conversion is explicit and kept in this class, following
  * the same style as {@link ProductService}: no MapStruct, no generic mappers.
  *
- * The cart total is always computed from the current items (sum of item
- * subtotals) and never persisted. No discounts are applied at this stage.
+ * The cart totals are computed from current items and the optional promotion.
+ * Checkout persists a historical snapshot in the order domain.
  */
 @Service
 public class CartService {
@@ -87,8 +87,15 @@ public class CartService {
         }
         cartItemRepository.findByCartIdAndProductId(cartId, request.productId())
                 .ifPresentOrElse(
-                        item -> item.setQuantity(item.getQuantity() + request.quantity()),
-                        () -> cartItemRepository.save(new CartItem(cart, product, request.quantity())));
+                        item -> {
+                            int requested = item.getQuantity() + request.quantity();
+                            validateStock(product, requested);
+                            item.setQuantity(requested);
+                        },
+                        () -> {
+                            validateStock(product, request.quantity());
+                            cartItemRepository.save(new CartItem(cart, product, request.quantity()));
+                        });
         return toResponse(cart);
     }
 
@@ -96,6 +103,7 @@ public class CartService {
     public CartResponse updateQuantity(Long cartId, Long productId, CartItemQuantityUpdateRequest request) {
         Cart cart = findActiveCart(cartId);
         CartItem item = findItem(cartId, productId);
+        validateStock(item.getProduct(), request.quantity());
         item.setQuantity(request.quantity());
         return toResponse(cart);
     }
@@ -139,6 +147,12 @@ public class CartService {
             throw new CartNotActiveException(cartId);
         }
         return cart;
+    }
+
+    private void validateStock(Product product, int requested) {
+        if (product.getStock() < requested) {
+            throw new InsufficientStockException(product.getName(), requested, product.getStock());
+        }
     }
 
     private CartItem findItem(Long cartId, Long productId) {

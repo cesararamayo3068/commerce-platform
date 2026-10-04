@@ -51,6 +51,9 @@ public class Product extends AuditableEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name = "stock", nullable = false)
+    private int stock = 20;
+
     protected Product() {
         // required by JPA
     }
@@ -104,4 +107,8 @@ public class Product extends AuditableEntity {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
+    public void decreaseStock(int quantity) { this.stock -= quantity; }
 }

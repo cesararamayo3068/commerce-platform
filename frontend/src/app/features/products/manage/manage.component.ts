@@ -55,6 +55,7 @@ type Mode = 'list' | 'create' | 'edit';
                   <th>Nombre</th>
                   <th>Descripción</th>
                   <th>Precio</th>
+                  <th>Stock</th>
                   <th>Estado</th>
                   <th>Actualizado</th>
                   <th class="manage__th-actions">Acciones</th>
@@ -66,6 +67,7 @@ type Mode = 'list' | 'create' | 'edit';
                     <td class="manage__cell-name">{{ product.name }}</td>
                     <td class="manage__cell-desc">{{ product.description || '—' }}</td>
                     <td>{{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}</td>
+                    <td>{{ product.stock }}</td>
                     <td>
                       <span class="manage__status" [class.manage__status--inactive]="!product.active">
                         {{ product.active ? 'Activo' : 'Inactivo' }}
@@ -227,9 +229,9 @@ export class ManageComponent implements OnInit {
     this.load();
   }
 
-  onSubmit(payload: { name: string; description: string | null; brand: string | null; category: string | null; imageUrl: string | null; price: number; active: boolean | null }): void {
+  onSubmit(payload: { name: string; description: string | null; brand: string | null; category: string | null; imageUrl: string | null; price: number; stock: number; active: boolean | null }): void {
     if (this.mode() === 'create') {
-      const request: ProductCreateRequest = { name: payload.name, description: payload.description, brand: payload.brand, category: payload.category, imageUrl: payload.imageUrl, price: payload.price };
+      const request: ProductCreateRequest = { name: payload.name, description: payload.description, brand: payload.brand, category: payload.category, imageUrl: payload.imageUrl, price: payload.price, stock: payload.stock };
       this.productService.create(request).subscribe({
         next: (created) => {
           this.toastService.success(`Producto "${created.name}" creado`);
@@ -249,6 +251,7 @@ export class ManageComponent implements OnInit {
         category: payload.category,
         imageUrl: payload.imageUrl,
         price: payload.price,
+        stock: payload.stock,
         active: payload.active,
       };
       this.productService.update(product.id, request).subscribe({

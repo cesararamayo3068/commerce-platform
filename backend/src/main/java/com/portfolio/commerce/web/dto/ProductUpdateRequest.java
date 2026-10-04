@@ -1,39 +1,14 @@
 package com.portfolio.commerce.web.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
-/**
- * Request body for updating a product (PUT semantics).
- *
- * {@code active} is optional: when {@code null}, the current value is kept.
- * The client cannot set id, createdAt or updatedAt.
- */
 public record ProductUpdateRequest(
-
-        @NotBlank(message = "name is required")
-        @Size(max = 150, message = "name must be at most 150 characters")
-        String name,
-
+        @NotBlank(message = "name is required") @Size(max = 150) String name,
         String description,
-
-        @Size(max = 100, message = "brand must be at most 100 characters")
-        String brand,
-
-        @Size(max = 100, message = "category must be at most 100 characters")
-        String category,
-
-        @Size(max = 500, message = "imageUrl must be at most 500 characters")
-        String imageUrl,
-
-        @NotNull(message = "price is required")
-        @DecimalMin(value = "0.0", inclusive = true, message = "price must be greater than or equal to 0")
-        BigDecimal price,
-
-        Boolean active
-) {
-}
+        @Size(max = 100) String brand,
+        @Size(max = 100) String category,
+        @Size(max = 500) String imageUrl,
+        @NotNull(message = "price is required") @DecimalMin(value = "0.0", inclusive = true) BigDecimal price,
+        @NotNull(message = "stock is required") @Min(value = 0, message = "stock must be greater than or equal to 0") Integer stock,
+        Boolean active) {}

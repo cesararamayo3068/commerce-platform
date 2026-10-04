@@ -33,6 +33,7 @@ describe('ProductService', () => {
           description: null,
           brand: null, category: null, imageUrl: null,
           price: 99.99,
+          stock: 20,
           active: true,
           createdAt: '2026-01-01T00:00:00Z',
           updatedAt: '2026-01-01T00:00:00Z',
@@ -55,19 +56,20 @@ describe('ProductService', () => {
   });
 
   it('creates a product with the ProductCreateRequest body', () => {
-    service.create({ name: 'Mouse', description: null, brand: null, category: null, imageUrl: null, price: 25.5 }).subscribe((product) => {
+    service.create({ name: 'Mouse', description: null, brand: null, category: null, imageUrl: null, price: 25.5, stock: 20 }).subscribe((product) => {
       expect(product.id).toBe(2);
     });
 
     const req = httpMock.expectOne(`${environment.apiUrl}/products`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ name: 'Mouse', description: null, brand: null, category: null, imageUrl: null, price: 25.5 });
+    expect(req.request.body).toEqual({ name: 'Mouse', description: null, brand: null, category: null, imageUrl: null, price: 25.5, stock: 20 });
     req.flush({
       id: 2,
       name: 'Mouse',
       description: null,
       brand: null, category: null, imageUrl: null,
       price: 25.5,
+      stock: 20,
       active: true,
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
@@ -87,6 +89,7 @@ describe('ProductService', () => {
       description: null,
       brand: null, category: null, imageUrl: null,
       price: 1,
+      stock: 0,
       active: false,
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',

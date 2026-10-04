@@ -54,7 +54,7 @@ describe('ProductFormComponent', () => {
     component.form.controls.price.setValue(99.99);
     component.onSubmit();
 
-    expect(emitted).toEqual({ name: 'Teclado', description: null, brand: null, category: null, imageUrl: null, price: 99.99, active: null });
+    expect(emitted).toEqual({ name: 'Teclado', description: null, brand: null, category: null, imageUrl: null, price: 99.99, stock: 20, active: null });
   });
 
   it('emits an update payload with the active flag when editing', () => {
@@ -66,6 +66,7 @@ describe('ProductFormComponent', () => {
       description: 'Mecánico',
       brand: null, category: null, imageUrl: null,
       price: 99.99,
+      stock: 20,
       active: true,
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
@@ -85,6 +86,7 @@ describe('ProductFormComponent', () => {
       description: 'Mecánico',
       brand: null, category: null, imageUrl: null,
       price: 99.99,
+      stock: 20,
       active: false,
     });
   });

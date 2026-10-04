@@ -33,6 +33,7 @@ public class ProductService {
         product.setBrand(request.brand());
         product.setCategory(request.category());
         product.setImageUrl(request.imageUrl());
+        product.setStock(request.stock());
         return toResponse(productRepository.save(product));
     }
 
@@ -56,6 +57,7 @@ public class ProductService {
         product.setBrand(request.brand());
         product.setCategory(request.category());
         product.setImageUrl(request.imageUrl());
+        product.setStock(request.stock());
         if (request.active() != null) {
             product.setActive(request.active());
         }
@@ -88,6 +90,7 @@ public class ProductService {
                 product.getCategory(),
                 product.getImageUrl(),
                 product.getPrice(),
+                product.getStock(),
                 product.isActive(),
                 product.getCreatedAt(),
                 product.getUpdatedAt());

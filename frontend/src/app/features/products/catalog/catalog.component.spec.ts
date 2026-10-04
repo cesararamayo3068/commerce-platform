@@ -15,6 +15,7 @@ function product(id: number, name: string, active = true): Product {
     category: null,
     imageUrl: null,
     price: 10 + id,
+    stock: 20,
     active,
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',

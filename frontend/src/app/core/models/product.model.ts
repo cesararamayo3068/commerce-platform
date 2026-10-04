@@ -7,6 +7,7 @@ export interface Product {
   category: string | null;
   imageUrl: string | null;
   price: number;
+  stock: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -19,6 +20,7 @@ export interface ProductCreateRequest {
   category: string | null;
   imageUrl: string | null;
   price: number;
+  stock: number;
 }
 
 export interface ProductUpdateRequest extends ProductCreateRequest {

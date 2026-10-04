@@ -1,0 +1,43 @@
+ETAPA 8 - PEDIDOS Y CHECKOUT
+============================
+
+Incluye:
+- Stock persistente por producto y validacion de disponibilidad.
+- Migracion Flyway V5: products.stock, orders y order_items.
+- Checkout transaccional con bloqueo pesimista de carrito/productos para evitar sobreventa.
+- Snapshot historico de nombre, precio, cantidad, subtotal, descuento y cupon en cada pedido.
+- Descuento de stock y cambio del carrito a CHECKED_OUT al confirmar la compra.
+- Endpoints autenticados: POST /api/orders/checkout/{cartId}, GET /api/orders, GET /api/orders/{id}.
+- Historial de pedidos en Angular (/orders).
+- Boton Finalizar compra en el carrito.
+- Stock visible en catalogo/administracion y editable por ADMIN.
+- Pruebas unitarias nuevas para OrderService y OrderService Angular.
+
+Entorno local:
+- Seguir usando UNICAMENTE el proyecto Docker portfolio-commerce.
+- No crear contenedores stage8.
+- Aplicar este ZIP sobre C:\portfolio\commerce-platform estando en feature/orders-checkout.
+- Luego reconstruir con: docker compose up -d --build
+
+Validacion realizada al preparar el paquete:
+- Frontend: 26/26 tests aprobados (7 archivos).
+- Frontend: build de desarrollo aprobado.
+- El build de produccion no pudo completar en el sandbox de preparacion porque Angular intenta descargar Google Fonts y ese entorno no tiene acceso de red. No hubo errores TypeScript antes de ese punto.
+- Backend: se agregaron pruebas de OrderService, pero Maven no pudo ejecutarse en el sandbox de preparacion porque el wrapper necesita descargar Maven. Ejecutar los tests dentro del Docker local del proyecto antes de hacer commit.
+
+Pruebas funcionales sugeridas:
+1. Iniciar sesion.
+2. Agregar un producto con stock al carrito.
+3. Aplicar un cupon (opcional).
+4. Finalizar compra.
+5. Verificar redireccion a Mis pedidos y totales historicos.
+6. Verificar que el stock haya disminuido.
+7. Intentar superar el stock disponible y comprobar el rechazo.
+
+CORRECCION ADMIN LOCAL
+----------------------
+- compose.yaml pasa ADMIN_EMAIL, ADMIN_PASSWORD y ADMIN_DNI al backend.
+- .env.example documenta las variables sin incluir secretos.
+- AdminBootstrap existente crea el ADMIN con PasswordEncoder y evita duplicarlo por email.
+- El archivo .env real NO se incluye ni se sobrescribe.
+- Se mantiene un unico proyecto Docker Compose: portfolio-commerce.

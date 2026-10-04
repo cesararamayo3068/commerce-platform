@@ -44,6 +44,9 @@ services:
       # Origenes permitidos para CORS (frontend Angular)
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:14200}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatorio. Definilo en .env.}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_DNI: ${ADMIN_DNI:-}
     ports:
       - "${BACKEND_PORT:-18080}:8080"
     depends_on:

@@ -2,6 +2,7 @@ import { authGuard, adminGuard } from './core/services/auth.guard';
 import { LoginComponent } from './features/auth/login.component';
 import { RegisterComponent } from './features/auth/register.component';
 import { PromotionsComponent } from './features/promotions/promotions.component';
+import { OrdersComponent } from './features/orders/orders.component';
 import { Routes } from '@angular/router';
 import { CatalogComponent } from './features/products/catalog/catalog.component';
 import { ManageComponent } from './features/products/manage/manage.component';
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'products/manage', component: ManageComponent, canActivate: [adminGuard] },
   { path: 'promotions', component: PromotionsComponent, canActivate: [adminGuard] },
   { path: 'cart', component: CartPageComponent, canActivate: [authGuard] },
+  { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: '**', redirectTo: '/products' },

@@ -13,15 +13,15 @@ import { Product } from '../../../core/models/product.model';
           <div class="fallback" aria-hidden="true">{{ product().name.charAt(0) }}</div>
         }
         @if (product().category) { <span class="category">{{ product().category }}</span> }
-        @if (!product().active) { <span class="status">Inactivo</span> }
+        @if (!product().active) { <span class="status">Inactivo</span> } @else if (product().stock === 0) { <span class="status">Sin stock</span> }
       </div>
       <div class="body">
         <div class="brand">{{ product().brand || 'Commerce Select' }}</div>
         <h3>{{ product().name }}</h3>
         <p>{{ product().description || 'Producto seleccionado para nuestro catálogo.' }}</p>
         <div class="bottom">
-          <div class="price"><small>Precio</small><strong>{{ product().price | currency:'USD':'symbol':'1.2-2' }}</strong></div>
-          <button class="btn btn--primary" [disabled]="!product().active || adding()" (click)="add.emit(product())" data-testid="add-to-cart">
+          <div class="price"><small>Stock: {{ product().stock }}</small><strong>{{ product().price | currency:'USD':'symbol':'1.2-2' }}</strong></div>
+          <button class="btn btn--primary" [disabled]="!product().active || product().stock === 0 || adding()" (click)="add.emit(product())" data-testid="add-to-cart">
             {{ adding() ? 'Agregando…' : 'Agregar' }}
           </button>
         </div>

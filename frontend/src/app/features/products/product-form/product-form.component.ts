@@ -83,6 +83,14 @@ import { Product } from '../../../core/models/product.model';
         }
       </div>
 
+      <div class="field">
+        <label class="field__label" for="stock">Stock *</label>
+        <input id="stock" type="number" min="0" step="1" formControlName="stock" class="field__input" data-testid="product-stock" />
+        @if (form.controls.stock.touched && form.controls.stock.errors) {
+          <p class="field__error">El stock debe ser un número entero mayor o igual a 0.</p>
+        }
+      </div>
+
       @if (editing()) {
         <div class="field field--inline">
           <label class="field__label" for="active">Activo</label>
@@ -163,7 +171,7 @@ export class ProductFormComponent implements OnInit {
   readonly product = input<Product | null>(null);
   readonly submitting = signal(false);
   readonly serverError = signal<string | null>(null);
-  readonly submit = output<{ name: string; description: string | null; brand: string | null; category: string | null; imageUrl: string | null; price: number; active: boolean | null }>();
+  readonly submit = output<{ name: string; description: string | null; brand: string | null; category: string | null; imageUrl: string | null; price: number; stock: number; active: boolean | null }>();
   readonly cancel = output<void>();
 
   readonly form = this.fb.group({
@@ -173,6 +181,7 @@ export class ProductFormComponent implements OnInit {
     category: ['', [Validators.maxLength(100)]],
     imageUrl: ['', [Validators.maxLength(500)]],
     price: [null as number | null, [Validators.required, Validators.min(0)]],
+    stock: [20 as number | null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
     active: [true],
   });
 
@@ -186,6 +195,7 @@ export class ProductFormComponent implements OnInit {
         category: product.category ?? '',
         imageUrl: product.imageUrl ?? '',
         price: product.price,
+        stock: product.stock,
         active: product.active,
       });
     }
@@ -205,6 +215,7 @@ export class ProductFormComponent implements OnInit {
       category: raw.category?.trim() || null,
       imageUrl: raw.imageUrl?.trim() || null,
       price: raw.price as number,
+      stock: raw.stock as number,
       active: this.editing() ? (raw.active ?? true) : null,
     });
   }

@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { OrderService } from '../../../core/services/order.service';
 import { CartService } from '../../../core/services/cart.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { toUserMessage } from '../../../core/utils/error-handler';
@@ -101,9 +102,12 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                 <span>Total</span>
                 <span data-testid="cart-total">{{ cart.total | currency: 'USD' : 'symbol' : '1.2-2' }}</span>
               </div>
+              <button class="btn btn--primary btn--block" [disabled]="busy() || checkingOut()" (click)="checkout()" data-testid="checkout">
+                {{ checkingOut() ? 'Confirmando…' : 'Finalizar compra' }}
+              </button>
               <button
                 class="btn btn--danger btn--block"
-                [disabled]="busy()"
+                [disabled]="busy() || checkingOut()"
                 (click)="cancelCart()"
                 data-testid="cancel-cart"
               >
@@ -199,6 +203,8 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 export class CartPageComponent implements OnInit {
   readonly cartService = inject(CartService);
   private readonly toastService = inject(ToastService);
+  private readonly orderService = inject(OrderService);
+  private readonly router = inject(Router);
 
   couponCode = '';
   applyCoupon(): void {
@@ -217,6 +223,7 @@ export class CartPageComponent implements OnInit {
   }
   readonly busy = signal(false);
   readonly cancelling = signal(false);
+  readonly checkingOut = signal(false);
 
   ngOnInit(): void {
     this.cartService.restore();
@@ -267,6 +274,25 @@ export class CartPageComponent implements OnInit {
       },
       error: (err) => {
         this.busy.set(false);
+        this.toastService.error(toUserMessage(err));
+      },
+    });
+  }
+
+
+  checkout(): void {
+    const cart = this.cartService.cart();
+    if (!cart) return;
+    this.checkingOut.set(true);
+    this.orderService.checkout(cart.id).subscribe({
+      next: (order) => {
+        this.checkingOut.set(false);
+        this.cartService.clearLocalState();
+        this.toastService.success(`Pedido #${order.id} confirmado`);
+        this.router.navigate(['/orders']);
+      },
+      error: (err) => {
+        this.checkingOut.set(false);
         this.toastService.error(toUserMessage(err));
       },
     });

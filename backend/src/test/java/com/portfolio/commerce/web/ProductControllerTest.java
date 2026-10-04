@@ -40,7 +40,7 @@ class ProductControllerTest {
     private ProductService productService;
 
     private ProductResponse response(Long id, String name, boolean active) {
-        return new ProductResponse(id, name, "Description", null, null, null, new BigDecimal("99.99"), active,
+        return new ProductResponse(id, name, "Description", null, null, null, new BigDecimal("99.99"), 20, active,
                 Instant.parse("2026-09-18T10:00:00Z"), Instant.parse("2026-09-18T10:00:00Z"));
     }
 
@@ -51,7 +51,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"name": "Teclado", "description": "Mecanico", "price": 99.99}
+                                {"name": "Teclado", "description": "Mecanico", "price": 99.99, "stock": 20}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
@@ -64,7 +64,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"name": " ", "price": 10.00}
+                                {"name": " ", "price": 10.00, "stock": 20}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
@@ -76,7 +76,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"name": "Teclado", "price": -5.00}
+                                {"name": "Teclado", "price": -5.00, "stock": 20}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("price"));
@@ -87,7 +87,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"name": "Teclado"}
+                                {"name": "Teclado", "stock": 20}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("price"));
@@ -151,7 +151,7 @@ class ProductControllerTest {
         mockMvc.perform(put("/api/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"name": "Teclado RGB", "price": 129.00}
+                                {"name": "Teclado RGB", "price": 129.00, "stock": 20}
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Teclado RGB"));

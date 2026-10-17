@@ -3,6 +3,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Order } from '../../core/models/order.model';
 import { OrderService } from '../../core/services/order.service';
+import { PaymentService } from '../../core/services/payment.service';
+import { Payment, PaymentStatus } from '../../core/models/payment.model';
 import { toUserMessage } from '../../core/utils/error-handler';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
@@ -28,6 +30,12 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
                 <div><span class="order-number">Pedido #{{ order.id }}</span><small>{{ order.createdAt | date:'medium' }}</small></div>
                 <span [class]="'status status--' + order.status.toLowerCase()">{{ statusLabel(order.status) }}</span>
               </div>
+              <div class="payment-info">Pago: {{ payments()[order.id]?.status ?? 'Consultando...' }}
+                @if (payments()[order.id]?.status === 'PENDING') {
+                  <button type="button" (click)="simulate(order.id, 'APPROVED')">Simular aprobación</button>
+                  <button type="button" (click)="simulate(order.id, 'REJECTED')">Simular rechazo</button>
+                }
+              </div>
               <div class="items">
                 @for (item of order.items; track item.productId) {
                   <div class="item"><div><strong>{{ item.productName }}</strong><small>{{ item.quantity }} × {{ item.unitPrice | currency:'USD':'symbol':'1.2-2' }}</small></div><b>{{ item.subtotal | currency:'USD':'symbol':'1.2-2' }}</b></div>
@@ -51,13 +59,20 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
 export class OrdersComponent implements OnInit {
   statusLabel(status: Order['status']): string { return ({CONFIRMED:'Confirmado',PROCESSING:'En preparación',SHIPPED:'Enviado',DELIVERED:'Entregado',CANCELLED:'Cancelado'})[status]; }
   private readonly orderService = inject(OrderService);
+  private readonly paymentService = inject(PaymentService);
+  readonly payments = signal<Record<number, Payment>>({});
+  simulate(id:number,outcome:Exclude<PaymentStatus,'PENDING'>):void {
+    this.paymentService.simulate(id,outcome).subscribe({next:()=>this.refreshPayment(id),error:err=>this.error.set(toUserMessage(err))});
+  }
+  refreshPayment(id:number):void { this.paymentService.get(id).subscribe({next:p=>this.payments.update(current=>({...current,[id]:p})),error:()=>{}}); }
+
   readonly orders = signal<Order[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
     this.orderService.list().subscribe({
-      next: orders => { this.orders.set(orders); this.loading.set(false); },
+      next: orders => { this.orders.set(orders); orders.forEach(o=>this.refreshPayment(o.id)); this.loading.set(false); },
       error: err => { this.error.set(toUserMessage(err)); this.loading.set(false); },
     });
   }

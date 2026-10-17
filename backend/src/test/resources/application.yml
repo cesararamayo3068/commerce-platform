@@ -13,3 +13,7 @@ spring:
       ddl-auto: none
 auth:
   jwt-secret: test-only-secret-not-for-production-1234567890
+
+payments:
+  worker:
+    enabled: false

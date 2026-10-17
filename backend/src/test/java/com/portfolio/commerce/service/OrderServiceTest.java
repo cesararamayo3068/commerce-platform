@@ -3,6 +3,7 @@ package com.portfolio.commerce.service;
 import com.portfolio.commerce.domain.cart.*;
 import com.portfolio.commerce.domain.order.*;
 import com.portfolio.commerce.domain.product.*;
+import com.portfolio.commerce.domain.payment.*;
 import com.portfolio.commerce.domain.user.User;
 import com.portfolio.commerce.web.dto.OrderResponse;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ class OrderServiceTest {
     @Mock CartItemRepository cartItemRepository;
     @Mock ProductRepository productRepository;
     @Mock PromotionService promotionService;
+    @Mock PaymentRepository paymentRepository;
     @InjectMocks OrderService orderService;
 
     @Test

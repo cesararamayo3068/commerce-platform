@@ -3,6 +3,7 @@ package com.portfolio.commerce.service;
 import com.portfolio.commerce.domain.cart.*;
 import com.portfolio.commerce.domain.order.*;
 import com.portfolio.commerce.domain.product.*;
+import com.portfolio.commerce.domain.payment.*;
 import com.portfolio.commerce.web.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,16 +19,18 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final PromotionService promotionService;
+    private final PaymentRepository paymentRepository;
 
     public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
                         CartRepository cartRepository, CartItemRepository cartItemRepository,
-                        ProductRepository productRepository, PromotionService promotionService) {
+                        ProductRepository productRepository, PromotionService promotionService, PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.promotionService = promotionService;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
@@ -71,6 +74,7 @@ public class OrderService {
         }
         cart.setStatus(CartStatus.CHECKED_OUT);
         cartRepository.saveAndFlush(cart);
+        paymentRepository.save(new Payment(order));
         return toResponse(order);
     }
 
@@ -99,6 +103,12 @@ public class OrderService {
         if (current == requested) return toResponse(order);
         if (!isAllowed(current, requested)) throw new InvalidOrderStatusTransitionException(current, requested);
 
+        if (requested == OrderStatus.PROCESSING || requested == OrderStatus.SHIPPED || requested == OrderStatus.DELIVERED) {
+            paymentRepository.findByOrderId(orderId).ifPresent(payment -> {
+                if (payment.getStatus() != PaymentStatus.APPROVED)
+                    throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "Payment not approved");
+            });
+        }
         if (requested == OrderStatus.CANCELLED) {
             for (OrderItem item : orderItemRepository.findByOrderIdOrderByIdAsc(orderId)) {
                 Product product = productRepository.findByIdForUpdate(item.getProduct().getId())

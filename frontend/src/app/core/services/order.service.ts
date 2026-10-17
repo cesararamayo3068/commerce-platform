@@ -17,6 +17,14 @@ export class OrderService {
     return this.http.get<Order[]>(this.baseUrl);
   }
 
+  listAll(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.baseUrl}/admin`);
+  }
+
+  updateStatus(id: number, status: import('../models/order.model').OrderStatus): Observable<Order> {
+    return this.http.put<Order>(`${this.baseUrl}/admin/${id}/status`, { status });
+  }
+
   getById(id: number): Observable<Order> {
     return this.http.get<Order>(`${this.baseUrl}/${id}`);
   }

@@ -111,4 +111,5 @@ public class Product extends AuditableEntity {
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
     public void decreaseStock(int quantity) { this.stock -= quantity; }
+    public void increaseStock(int quantity) { this.stock += quantity; }
 }

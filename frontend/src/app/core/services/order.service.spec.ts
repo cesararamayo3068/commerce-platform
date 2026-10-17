@@ -27,4 +27,19 @@ describe('OrderService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
+
+  it('lists all orders for admin', () => {
+    service.listAll().subscribe();
+    const req = http.expectOne(`${environment.apiUrl}/orders/admin`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('updates an order status as admin', () => {
+    service.updateStatus(11, 'PROCESSING').subscribe();
+    const req = http.expectOne(`${environment.apiUrl}/orders/admin/11/status`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ status: 'PROCESSING' });
+    req.flush({});
+  });
 });

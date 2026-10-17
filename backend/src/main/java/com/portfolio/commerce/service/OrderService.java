@@ -86,6 +86,40 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
     }
 
+    @Transactional(readOnly = true)
+    public List<OrderResponse> listAll() {
+        return orderRepository.findAllByOrderByCreatedAtDesc().stream().map(this::toResponse).toList();
+    }
+
+    @Transactional
+    public OrderResponse updateStatus(Long orderId, OrderStatus requested) {
+        Order order = orderRepository.findByIdForUpdate(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        OrderStatus current = order.getStatus();
+        if (current == requested) return toResponse(order);
+        if (!isAllowed(current, requested)) throw new InvalidOrderStatusTransitionException(current, requested);
+
+        if (requested == OrderStatus.CANCELLED) {
+            for (OrderItem item : orderItemRepository.findByOrderIdOrderByIdAsc(orderId)) {
+                Product product = productRepository.findByIdForUpdate(item.getProduct().getId())
+                        .orElseThrow(() -> new ProductNotFoundException(item.getProduct().getId()));
+                product.increaseStock(item.getQuantity());
+            }
+        }
+        order.setStatus(requested);
+        orderRepository.saveAndFlush(order);
+        return toResponse(order);
+    }
+
+    private boolean isAllowed(OrderStatus current, OrderStatus requested) {
+        return switch (current) {
+            case CONFIRMED -> requested == OrderStatus.PROCESSING || requested == OrderStatus.CANCELLED;
+            case PROCESSING -> requested == OrderStatus.SHIPPED || requested == OrderStatus.CANCELLED;
+            case SHIPPED -> requested == OrderStatus.DELIVERED;
+            case DELIVERED, CANCELLED -> false;
+        };
+    }
+
     private OrderResponse toResponse(Order order) {
         List<OrderItemResponse> items = orderItemRepository.findByOrderIdOrderByIdAsc(order.getId()).stream()
                 .map(item -> new OrderItemResponse(item.getProduct().getId(), item.getProductName(), item.getUnitPrice(), item.getQuantity(), item.getSubtotal()))

@@ -10,6 +10,7 @@ import com.portfolio.commerce.service.OrderNotFoundException;
 import com.portfolio.commerce.service.EmptyCartException;
 import com.portfolio.commerce.service.InsufficientStockException;
 import com.portfolio.commerce.service.OrderAlreadyExistsException;
+import com.portfolio.commerce.service.InvalidOrderStatusTransitionException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({CartNotActiveException.class, ProductNotActiveException.class, EmptyCartException.class,
-            InsufficientStockException.class, OrderAlreadyExistsException.class})
+            InsufficientStockException.class, OrderAlreadyExistsException.class, InvalidOrderStatusTransitionException.class})
     public ResponseEntity<ApiError> handleConflict(RuntimeException ex, HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, ex.getMessage(), request, null);
     }

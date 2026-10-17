@@ -26,7 +26,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
             <article class="order-card">
               <div class="order-card__top">
                 <div><span class="order-number">Pedido #{{ order.id }}</span><small>{{ order.createdAt | date:'medium' }}</small></div>
-                <span class="status">{{ order.status }}</span>
+                <span [class]="'status status--' + order.status.toLowerCase()">{{ statusLabel(order.status) }}</span>
               </div>
               <div class="items">
                 @for (item of order.items; track item.productId) {
@@ -49,6 +49,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
   `,
 })
 export class OrdersComponent implements OnInit {
+  statusLabel(status: Order['status']): string { return ({CONFIRMED:'Confirmado',PROCESSING:'En preparación',SHIPPED:'Enviado',DELIVERED:'Entregado',CANCELLED:'Cancelado'})[status]; }
   private readonly orderService = inject(OrderService);
   readonly orders = signal<Order[]>([]);
   readonly loading = signal(true);

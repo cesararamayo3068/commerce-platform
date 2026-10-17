@@ -29,5 +29,13 @@ public class OrderController {
         return orderService.getById(id, userId(jwt));
     }
 
+    @GetMapping("/admin")
+    public List<OrderResponse> listAll() { return orderService.listAll(); }
+
+    @PutMapping("/admin/{id}/status")
+    public OrderResponse updateStatus(@PathVariable Long id, @jakarta.validation.Valid @RequestBody com.portfolio.commerce.web.dto.OrderStatusUpdateRequest request) {
+        return orderService.updateStatus(id, request.status());
+    }
+
     private Long userId(Jwt jwt) { return ((Number) jwt.getClaim("userId")).longValue(); }
 }

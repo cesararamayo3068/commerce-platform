@@ -38,4 +38,5 @@ public class Order extends AuditableEntity {
     public BigDecimal getDiscount() { return discount; }
     public BigDecimal getTotal() { return total; }
     public String getPromotionCode() { return promotionCode; }
+    public void setStatus(OrderStatus status) { this.status = status; }
 }

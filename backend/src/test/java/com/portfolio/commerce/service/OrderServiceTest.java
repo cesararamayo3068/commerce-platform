@@ -76,6 +76,55 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.checkout(7L, 1L)).isInstanceOf(EmptyCartException.class);
     }
 
+    @Test
+    void adminCanMoveOrderFromConfirmedToProcessing() {
+        User user = new User("123", "Cesar", "Test", false); setId(user, 1L);
+        Cart cart = new Cart(user, CartStatus.CHECKED_OUT); setId(cart, 7L);
+        Order order = new Order(user, cart, new BigDecimal("100.00"), BigDecimal.ZERO, new BigDecimal("100.00"), null); setId(order, 11L);
+        when(orderRepository.findByIdForUpdate(11L)).thenReturn(Optional.of(order));
+        when(orderRepository.saveAndFlush(order)).thenReturn(order);
+        when(orderItemRepository.findByOrderIdOrderByIdAsc(11L)).thenReturn(List.of());
+
+        OrderResponse response = orderService.updateStatus(11L, OrderStatus.PROCESSING);
+
+        assertThat(response.status()).isEqualTo(OrderStatus.PROCESSING);
+        verify(orderRepository).saveAndFlush(order);
+    }
+
+    @Test
+    void cancellingConfirmedOrderRestoresStockExactlyOnce() {
+        User user = new User("123", "Cesar", "Test", false); setId(user, 1L);
+        Product product = new Product("Keyboard", "Mechanical", new BigDecimal("100.00"), true); setId(product, 5L); product.setStock(8);
+        Cart cart = new Cart(user, CartStatus.CHECKED_OUT); setId(cart, 7L);
+        Order order = new Order(user, cart, new BigDecimal("200.00"), BigDecimal.ZERO, new BigDecimal("200.00"), null); setId(order, 11L);
+        OrderItem item = new OrderItem(order, product, product.getName(), product.getPrice(), 2); setId(item, 12L);
+        when(orderRepository.findByIdForUpdate(11L)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderIdOrderByIdAsc(11L)).thenReturn(List.of(item));
+        when(productRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(product));
+        when(orderRepository.saveAndFlush(order)).thenReturn(order);
+
+        OrderResponse response = orderService.updateStatus(11L, OrderStatus.CANCELLED);
+
+        assertThat(response.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(product.getStock()).isEqualTo(10);
+        assertThatThrownBy(() -> orderService.updateStatus(11L, OrderStatus.PROCESSING))
+                .isInstanceOf(InvalidOrderStatusTransitionException.class);
+        assertThat(product.getStock()).isEqualTo(10);
+    }
+
+    @Test
+    void shippedOrderCannotBeCancelled() {
+        User user = new User("123", "Cesar", "Test", false); setId(user, 1L);
+        Cart cart = new Cart(user, CartStatus.CHECKED_OUT); setId(cart, 7L);
+        Order order = new Order(user, cart, new BigDecimal("100.00"), BigDecimal.ZERO, new BigDecimal("100.00"), null); setId(order, 11L);
+        order.setStatus(OrderStatus.SHIPPED);
+        when(orderRepository.findByIdForUpdate(11L)).thenReturn(Optional.of(order));
+
+        assertThatThrownBy(() -> orderService.updateStatus(11L, OrderStatus.CANCELLED))
+                .isInstanceOf(InvalidOrderStatusTransitionException.class);
+        verify(productRepository, never()).findByIdForUpdate(any());
+    }
+
     private static void setId(Object entity, Long id) {
         try { var field = entity.getClass().getDeclaredField("id"); field.setAccessible(true); field.set(entity, id); }
         catch (Exception e) { throw new IllegalStateException(e); }

@@ -88,4 +88,23 @@ describe('CatalogComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('No se pudo conectar con el servidor');
   });
+  it('searches products and resets pagination', () => {
+    const fixture = TestBed.createComponent(CatalogComponent);
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiUrl}/products?page=0&size=12&active=true&sort=name,asc`)
+      .flush({ _embedded: { productResponseList: [] }, page: { size: 12, number: 0, totalElements: 0, totalPages: 0 } });
+
+    const input = fixture.nativeElement.querySelector('#catalog-search') as HTMLInputElement;
+    input.value = 'teclado';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    const form = fixture.nativeElement.querySelector('form.catalog__search') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/products?page=0&size=12&active=true&sort=name,asc&search=teclado`);
+    req.flush({ _embedded: { productResponseList: [product(1, 'Teclado')] }, page: { size: 12, number: 0, totalElements: 1, totalPages: 1 } });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Teclado');
+  });
+
 });

@@ -177,4 +177,16 @@ class ProductServiceTest {
         assertThat(page.getContent()).hasSize(1);
         verify(productRepository, never()).findAll(any(Pageable.class));
     }
+    @Test
+    void searchUsesRepositoryFilter() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(productRepository.search(eq(true), eq("mouse"), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(product(2L, "Mouse", new BigDecimal("25.00"), true))));
+
+        Page<ProductResponse> page = productService.list(true, "  mouse  ", pageable);
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).name()).isEqualTo("Mouse");
+    }
+
 }

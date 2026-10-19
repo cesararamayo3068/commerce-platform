@@ -48,6 +48,13 @@ public class ProductService {
         return products.map(this::toResponse);
     }
 
+    public Page<ProductResponse> list(Boolean active, String search, Pageable pageable) {
+        if (search == null || search.isBlank()) {
+            return list(active, pageable);
+        }
+        return productRepository.search(active, search.trim(), pageable).map(this::toResponse);
+    }
+
     @Transactional
     public ProductResponse update(Long id, ProductUpdateRequest request) {
         Product product = findProduct(id);

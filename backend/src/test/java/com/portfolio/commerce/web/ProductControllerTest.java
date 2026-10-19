@@ -116,13 +116,23 @@ class ProductControllerTest {
 
     @Test
     void listReturnsPagedModel() throws Exception {
-        when(productService.list(any(), any())).thenReturn(new PageImpl<>(List.of(response(1L, "Teclado", true))));
+        when(productService.list(any(), any(), any())).thenReturn(new PageImpl<>(List.of(response(1L, "Teclado", true))));
 
         mockMvc.perform(get("/api/products").param("active", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.productResponseList[0].name").value("Teclado"))
                 .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.page.number").value(0));
+    }
+
+    @Test
+    void listPassesSearchToService() throws Exception {
+        when(productService.list(eq(true), eq("teclado"), any()))
+                .thenReturn(new PageImpl<>(List.of(response(1L, "Teclado", true))));
+
+        mockMvc.perform(get("/api/products").param("active", "true").param("search", "teclado"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.productResponseList[0].name").value("Teclado"));
     }
 
     @Test
@@ -135,7 +145,7 @@ class ProductControllerTest {
 
     @Test
     void listWithInvalidSortReturns400() throws Exception {
-        when(productService.list(any(), any())).thenThrow(
+        when(productService.list(any(), any(), any())).thenThrow(
                 new PropertyReferenceException("unknownField", TypeInformation.of(Product.class), List.of()));
 
         mockMvc.perform(get("/api/products").param("sort", "unknownField"))

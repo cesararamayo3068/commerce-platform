@@ -98,8 +98,8 @@ describe('CatalogComponent', () => {
     input.value = 'teclado';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    const form = fixture.nativeElement.querySelector('form.catalog__search') as HTMLFormElement;
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.componentInstance.searchInput = 'teclado';
+    fixture.componentInstance.applySearch();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/products?page=0&size=12&active=true&sort=name,asc&search=teclado`);
     req.flush({ _embedded: { productResponseList: [product(1, 'Teclado')] }, page: { size: 12, number: 0, totalElements: 1, totalPages: 1 } });

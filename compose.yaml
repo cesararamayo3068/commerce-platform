@@ -1,9 +1,3 @@
-# ============================================================
-# commerce-platform — stack completo
-# Servicios: PostgreSQL 17, backend Spring Boot, frontend Angular.
-# Todos los recursos (containers, volumes, network) son propios
-# del proyecto con prefijo "portfolio-commerce".
-# ============================================================
 
 name: portfolio-commerce
 
@@ -35,13 +29,12 @@ services:
     container_name: portfolio-commerce-backend
     restart: unless-stopped
     environment:
-      # Conexion interna a PostgreSQL (misma red del proyecto)
+      SPRING_PROFILES_ACTIVE: dev
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${POSTGRES_DB:-commerce}
       DB_USER: ${POSTGRES_USER:-portfolio}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatoria. Copia .env.example a .env y definila.}
-      # Origenes permitidos para CORS (frontend Angular)
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:14200}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatorio. Definilo en .env.}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
@@ -67,8 +60,6 @@ services:
     container_name: portfolio-commerce-frontend
     restart: unless-stopped
     environment:
-      # El dev server de Angular escucha en 0.0.0.0:4200 dentro
-      # del contenedor; el host lo publica en 14200.
       NODE_ENV: development
     ports:
       - "${FRONTEND_PORT:-14200}:4200"
@@ -86,4 +77,3 @@ networks:
   portfolio-commerce-network:
     name: portfolio-commerce-network
     driver: bridge
-

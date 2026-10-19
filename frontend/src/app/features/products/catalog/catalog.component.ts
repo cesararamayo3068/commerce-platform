@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
@@ -12,7 +13,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 @Component({
   selector: 'app-catalog',
   standalone: true,
-  imports: [ProductCardComponent, LoadingComponent, EmptyStateComponent],
+  imports: [FormsModule, ProductCardComponent, LoadingComponent, EmptyStateComponent],
   template: `
     <section class="catalog">
       <div class="hero">
@@ -24,6 +25,17 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
         </div>
         <div class="hero__art" aria-hidden="true"><div class="orb orb--one"></div><div class="orb orb--two"></div><div class="hero__bag">C</div></div>
       </div>
+      <form class="catalog__search" (ngSubmit)="applySearch()" role="search">
+        <label for="catalog-search">Buscar productos</label>
+        <div class="catalog__search-controls">
+          <input id="catalog-search" name="search" type="search" [(ngModel)]="searchInput"
+            maxlength="100" placeholder="Nombre, marca o categoría" autocomplete="off" />
+          <button class="btn btn--primary" type="submit" [disabled]="loading()">Buscar</button>
+          @if (search()) {
+            <button class="btn btn--ghost" type="button" (click)="clearSearch()">Limpiar</button>
+          }
+        </div>
+      </form>
       <div class="catalog__header">
         <div>
           <div class="catalog__eyebrow">CATÁLOGO</div><h2 class="catalog__title">Productos para vos</h2>
@@ -54,7 +66,8 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
           <button class="btn btn--ghost btn--sm" (click)="load()">Reintentar</button>
         </div>
       } @else if (products().length === 0) {
-        <app-empty-state title="No hay productos activos" message="Creá un producto desde Administrar para verlo acá." />
+        <app-empty-state [title]="search() ? 'No encontramos resultados' : 'No hay productos activos'"
+          [message]="search() ? 'Probá con otro nombre, marca o categoría.' : 'Creá un producto desde Administrar para verlo acá.'" />
       } @else {
         <div class="catalog__grid" id="catalog-grid">
           @for (product of products(); track product.id) {
@@ -69,7 +82,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
     </section>
   `,
   styles: `
-    .catalog{display:flex;flex-direction:column;gap:2rem}.hero{min-height:250px;border-radius:28px;background:linear-gradient(120deg,#172554 0%,#253ea5 52%,#0ea5e9 130%);color:#fff;overflow:hidden;display:grid;grid-template-columns:1.2fr .8fr;box-shadow:0 18px 45px rgba(30,58,138,.18)}.hero__content{padding:2.35rem 2.75rem;position:relative;z-index:2}.hero__eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.16em;color:#bfdbfe}.hero h1{font-size:2.35rem;line-height:1.05;letter-spacing:-.04em;margin:.7rem 0 1rem}.hero h1 em{font-style:normal;color:#7dd3fc}.hero p{max-width:540px;color:#dbeafe;line-height:1.6;margin:0 0 1.5rem}.hero__cta{display:inline-flex;gap:.6rem;align-items:center;background:#fff;color:#1e3a8a;padding:.78rem 1rem;border-radius:12px;text-decoration:none;font-weight:800;font-size:.9rem}.hero__art{position:relative;display:grid;place-items:center}.hero__bag{position:relative;z-index:2;width:130px;height:130px;border-radius:32px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(12px);font-size:3.2rem;font-weight:800;box-shadow:0 20px 50px rgba(0,0,0,.18);transform:rotate(8deg)}.orb{position:absolute;border-radius:50%}.orb--one{width:220px;height:220px;background:rgba(125,211,252,.18)}.orb--two{width:120px;height:120px;background:rgba(255,255,255,.13);right:12%;top:10%}.catalog__header{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap}.catalog__eyebrow{font-size:.68rem;letter-spacing:.14em;color:#3157d5;font-weight:800;margin-bottom:.35rem}.catalog__title{font-size:1.7rem;color:#172033;margin:0}.catalog__subtitle{color:#6b7280;margin:.35rem 0 0}.catalog__pager{display:flex;align-items:center;gap:.75rem}.catalog__page-info{font-size:.82rem;color:#64748b}.catalog__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.4rem}.banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem}@media(max-width:760px){.hero{grid-template-columns:1fr;min-height:auto}.hero__content{padding:2.2rem 1.5rem}.hero h1{font-size:2.15rem}.hero__art{display:none}.catalog__pager{width:100%;justify-content:space-between}.catalog__grid{grid-template-columns:1fr}}
+    .catalog{display:flex;flex-direction:column;gap:2rem}.catalog__search{display:flex;flex-direction:column;gap:.5rem}.catalog__search label{font-weight:700;color:#172033}.catalog__search-controls{display:flex;gap:.65rem;flex-wrap:wrap}.catalog__search input{flex:1;min-width:180px;padding:.8rem 1rem;border:1px solid #cbd5e1;border-radius:12px;font:inherit}.catalog__search input:focus-visible{outline:2px solid #3157d5;outline-offset:2px}.hero{min-height:250px;border-radius:28px;background:linear-gradient(120deg,#172554 0%,#253ea5 52%,#0ea5e9 130%);color:#fff;overflow:hidden;display:grid;grid-template-columns:1.2fr .8fr;box-shadow:0 18px 45px rgba(30,58,138,.18)}.hero__content{padding:2.35rem 2.75rem;position:relative;z-index:2}.hero__eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.16em;color:#bfdbfe}.hero h1{font-size:2.35rem;line-height:1.05;letter-spacing:-.04em;margin:.7rem 0 1rem}.hero h1 em{font-style:normal;color:#7dd3fc}.hero p{max-width:540px;color:#dbeafe;line-height:1.6;margin:0 0 1.5rem}.hero__cta{display:inline-flex;gap:.6rem;align-items:center;background:#fff;color:#1e3a8a;padding:.78rem 1rem;border-radius:12px;text-decoration:none;font-weight:800;font-size:.9rem}.hero__art{position:relative;display:grid;place-items:center}.hero__bag{position:relative;z-index:2;width:130px;height:130px;border-radius:32px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(12px);font-size:3.2rem;font-weight:800;box-shadow:0 20px 50px rgba(0,0,0,.18);transform:rotate(8deg)}.orb{position:absolute;border-radius:50%}.orb--one{width:220px;height:220px;background:rgba(125,211,252,.18)}.orb--two{width:120px;height:120px;background:rgba(255,255,255,.13);right:12%;top:10%}.catalog__header{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap}.catalog__eyebrow{font-size:.68rem;letter-spacing:.14em;color:#3157d5;font-weight:800;margin-bottom:.35rem}.catalog__title{font-size:1.7rem;color:#172033;margin:0}.catalog__subtitle{color:#6b7280;margin:.35rem 0 0}.catalog__pager{display:flex;align-items:center;gap:.75rem}.catalog__page-info{font-size:.82rem;color:#64748b}.catalog__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.4rem}.banner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem}@media(max-width:760px){.hero{grid-template-columns:1fr;min-height:auto}.hero__content{padding:2.2rem 1.5rem}.hero h1{font-size:2.15rem}.hero__art{display:none}.catalog__pager{width:100%;justify-content:space-between}.catalog__grid{grid-template-columns:1fr}}
   `,
 })
 export class CatalogComponent implements OnInit {
@@ -81,6 +94,8 @@ export class CatalogComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly page = signal(0);
+  readonly search = signal('');
+  searchInput = '';
   readonly totalPages = signal(0);
   readonly addingProductId = signal<number | null>(null);
 
@@ -93,7 +108,7 @@ export class CatalogComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.productService.list(true, this.page(), this.pageSize, 'name,asc').subscribe({
+    this.productService.list(true, this.page(), this.pageSize, 'name,asc', this.search()).subscribe({
       next: (paged: PagedModel<Product>) => {
         this.products.set(paged._embedded?.productResponseList ?? []);
         this.totalPages.set(paged.page.totalPages);
@@ -104,6 +119,21 @@ export class CatalogComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  applySearch(): void {
+    const value = this.searchInput.trim();
+    if (value === this.search()) return;
+    this.search.set(value);
+    this.page.set(0);
+    this.load();
+  }
+
+  clearSearch(): void {
+    this.searchInput = '';
+    this.search.set('');
+    this.page.set(0);
+    this.load();
   }
 
   goToPage(target: number): void {

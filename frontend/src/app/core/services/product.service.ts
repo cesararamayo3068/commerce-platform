@@ -17,13 +17,16 @@ export class ProductService {
 
   constructor(private readonly http: HttpClient) {}
 
-  list(active: boolean | null, page: number, size: number, sort?: string): Observable<PagedModel<Product>> {
+  list(active: boolean | null, page: number, size: number, sort?: string, search?: string): Observable<PagedModel<Product>> {
     let params = new HttpParams().set('page', String(page)).set('size', String(size));
     if (active !== null) {
       params = params.set('active', String(active));
     }
     if (sort) {
       params = params.set('sort', sort);
+    }
+    if (search?.trim()) {
+      params = params.set('search', search.trim());
     }
     return this.http.get<PagedModel<Product>>(this.baseUrl, { params });
   }

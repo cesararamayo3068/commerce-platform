@@ -65,15 +65,16 @@ public class ProductController {
     }
 
     @GetMapping
-    @Operation(summary = "List products", description = "Paged listing, optionally filtered by active")
+    @Operation(summary = "List products", description = "Paged listing, optionally filtered by active and search term")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Paged list of products"),
             @ApiResponse(responseCode = "400", description = "Invalid pagination or sort parameters",
                     content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     public PagedModel<ProductResponse> list(@ParameterObject Pageable pageable,
-                                            @RequestParam(required = false) Boolean active) {
-        Page<ProductResponse> page = productService.list(active, pageable);
+                                            @RequestParam(required = false) Boolean active,
+                                            @RequestParam(required = false) String search) {
+        Page<ProductResponse> page = productService.list(active, search, pageable);
         return PagedModel.of(page.getContent(),
                 new PagedModel.PageMetadata(page.getSize(), page.getNumber(),
                         page.getTotalElements(), page.getTotalPages()));

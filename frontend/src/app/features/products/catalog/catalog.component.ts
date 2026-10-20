@@ -46,7 +46,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
             ← Anterior
           </button>
           <span class="catalog__page-info" data-testid="page-info">
-            Página {{ page() + 1 }} de {{ totalPages() }}
+             Página {{ page() + 1 }} de {{ totalPages() }}
           </span>
           <button
             class="btn btn--ghost btn--sm"

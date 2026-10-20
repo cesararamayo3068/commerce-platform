@@ -20,13 +20,13 @@ import { Component, input } from '@angular/core';
       gap: 0.5rem;
       padding: 3rem 1rem;
       text-align: center;
-      color: rgba(255, 255, 255, 0.55);
+      color: #64748b;
     }
     .empty__icon {
       font-size: 2.5rem;
-      color: rgba(56, 189, 248, 0.5);
+      color: #0284c7;
     }
-    .empty__title { font-size: 1.05rem; font-weight: 600; color: rgba(255, 255, 255, 0.85); }
+    .empty__title { font-size: 1.05rem; font-weight: 600; color: #172033;}
     .empty__message { font-size: 0.9rem; max-width: 32rem; }
   `,
 })
